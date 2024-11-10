@@ -3,12 +3,17 @@ package com.itstudy.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.itstudy.entity.Course;
+import com.itstudy.exception.ParameterException;
 import com.itstudy.service.CourseService;
 import com.itstudy.util.Constant;
 import com.itstudy.util.Result;
@@ -20,35 +25,34 @@ public class CourseContorller {
 	@Autowired
 	private CourseService courseService;
 
-	@RequestMapping("/{id}")
-	public Result<Course> selectById(@PathVariable("id") Integer  id) {
+	@GetMapping("/{id}")
+	public ResponseEntity<Course> selectById(@PathVariable("id") Integer  id) {
 
 		Result<Course> result = new Result<Course>();
 
 		Course courseResut = courseService.selectById(id);
 
-		System.out.println("courseResut" +courseResut);
-		result.setStatus(Constant.SUCCESS);
-		result.setData(courseResut);
-
-		return result;
+		return ResponseEntity.ok(courseResut);
 	}
 
-	@RequestMapping("/add")
-	public Result<Course> addCourse(@RequestBody Course course) {
+	@PostMapping("/add")
+	public ResponseEntity<Integer> addCourse(@RequestBody Course course) {
 
-		Result<Course> result = new Result<Course>();
+		// 参数校验。要求course的name长度要大于5
+		System.out.println("course "+course);
+		if(course.getName()==null || course.getName().length()<4 ) {
+			
+			throw new ParameterException("E001","parameter error");
+		}
+		Integer count = courseService.addCourse(course);
 
-		courseService.addCourse(course);
+		return ResponseEntity.ok().body(count);
 
-		result.setStatus(Constant.SUCCESS);
-		result.setData(course);
-
-		return result;
+		 
 
 	}
 
-	@RequestMapping("/update")
+	@PutMapping("/update")
 	public Result<Integer> updateCourse(@RequestBody Course course) {
 
 		Result<Integer> result = new Result<Integer>();
@@ -63,7 +67,7 @@ public class CourseContorller {
 	}
 
 	@RequestMapping("/like")
-	public Result<List<Course>> selectLikeName(@RequestBody Course course) {
+	public Result<List<Course>> selectLikeName(Course course) {
 
 		Result<List<Course>> result = new Result<List<Course>>();
 		String name = course.getName();

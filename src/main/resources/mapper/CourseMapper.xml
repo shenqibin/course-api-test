@@ -12,7 +12,7 @@
 
 	<insert id="addCourse" parameterType="com.itstudy.entity.Course"
 		useGeneratedKeys="true" keyProperty="id">
-		insert into course values ( #{name} ,#{status})
+		insert into course(name,status) values ( #{name} ,#{status})
 	</insert>
 
 	<update id="updateCourse"
